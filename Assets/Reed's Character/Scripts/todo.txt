@@ -1,0 +1,9 @@
+Things To Do:
+
+- Figure out skill level of enemy
+- Figure out when to have the enemy attack
+- Figure out when to have the enemy block
+- Figure out how the enemy should move
+- Figure out how to register a hit
+- Figure out how to hold health and when to trigger death
+- Figure out when to have enemy react to being hit
