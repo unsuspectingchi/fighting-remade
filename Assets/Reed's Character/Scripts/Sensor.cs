@@ -4,25 +4,15 @@ using UnityEngine;
 
 public class Sensor : MonoBehaviour
 {
-  public float sight;
-  public float attackRange;
-  public float angle;
+  public float sight; // The sight range of the paladin
+  public float attackRange; // The attack range of the paladin-- he will not go further toward player than this
+  public float angle; // The angle of sight
   public LayerMask objectsLayers;
   public LayerMask obstaclesLayers;
   public Collider detectedObject;
 
-  private void OnDrawGizmos()
-  {
-    Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, sight);
-    Gizmos.color = Color.blue;
-    Gizmos.DrawWireSphere(transform.position, attackRange);
-    Gizmos.color = Color.green;
-    Vector3 rightDirection = Quaternion.Euler(0, angle, 0) * transform.forward;
-    Gizmos.DrawRay(transform.position, rightDirection * sight);
-    Vector3 leftDirection = Quaternion.Euler(0, -angle, 0) * transform.forward;
-    Gizmos.DrawRay(transform.position, leftDirection * sight);
-  }
+  public bool isAttackable;
+  public bool isSeen;
   void Update()
   {
     Collider[] colliders = Physics.OverlapSphere(transform.position, sight, objectsLayers);
@@ -36,21 +26,20 @@ public class Sensor : MonoBehaviour
       {
         if (!Physics.Linecast(transform.position, collider.bounds.center, out RaycastHit hit, obstaclesLayers))
         {
-          Debug.DrawLine(transform.position, collider.bounds.center, Color.blue);
-          if (collider.gameObject.CompareTag("Player"))
+          if (collider.gameObject.CompareTag("Player")) // CHANGE TO WHATEVER THE PLAYER'S TAG IS
           {
             detectedObject = collider;
             float distance = Vector3.Distance(collider.ClosestPoint(transform.position), transform.position);
-            if (distance < attackRange) {
-              Debug.Log("Can Attack Enemy!");
-              continue;
+            if (distance < attackRange)
+            {
+              isAttackable = true;
             }
-            Debug.Log("See Enemy!");
+            else
+            {
+              isSeen = true;
+              isAttackable = false;
+            }
           }
-        }
-        else
-        {
-          Debug.DrawLine(transform.position, hit.point, Color.yellow);
         }
       }
     }

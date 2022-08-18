@@ -4,80 +4,66 @@ using UnityEngine;
 
 public class PaladinBehavior : MonoBehaviour
 {
-  Animator anim;
+  public float attackPercent = 0.2f; // Chance of attack per second
+  public float blockPercent = 0.5f; // Chance of block if player attacks
+  public float playerHitDamage = 15f; // The amount of damage the player's hit inflicts
+  public float health = 100.0f; // The health of the enemy
+  public bool isDead = false; // Self explanatory-- is set to true after death
+  public Sensor sensor; // The sensor script
+  public HitBehavior hitBehavior; // The hit behavior script
+
+  private Vector3 playerDir;
+  private Collider player;
+  private Animator anim;
 
   void Start()
   {
     anim = GetComponent<Animator>();
   }
 
+  private void FixedUpdate()
+  {
+    if (player)
+    {
+      playerDir = (transform.position - player.transform.position).normalized;
+      transform.rotation = Quaternion.Euler(new Vector3(0, Quaternion.LookRotation(-playerDir).eulerAngles.y, 0));
+    }
+
+    if (sensor.isAttackable)
+    {
+      if (true && Random.Range(0f, 1f) < attackPercent / 50) // REPLACE TRUE WITH PLAYER IS IDLE BOOL
+      {
+        anim.SetTrigger("Attack");
+      }
+      else if (true && Random.Range(0f, 1f) < blockPercent) // REPLACE TRUE WITH PLAYER IS ATTACKING BOOL
+      {
+        anim.SetTrigger("Block");
+      }
+    }
+  }
+
   void Update()
   {
-    /* Attack */ 
-    if (Input.GetKeyDown(KeyCode.I))
-    {
-      anim.SetTrigger("Attack");
-    }
-
-    /* Block */ 
-    if (Input.GetKeyDown(KeyCode.O))
-    {
-      anim.SetTrigger("Block");
-    }    
-    /* Hurt (be hit) */ 
-    if (Input.GetKeyDown(KeyCode.P))
-    {
-      anim.SetTrigger("Hurt");
-    }
-
-    /* Walk Forward */ 
-    if (Input.GetKeyDown(KeyCode.W))
+    if (sensor.isSeen && !sensor.isAttackable)
     {
       anim.SetBool("isWalkingForward", true);
+      player = sensor.detectedObject;
     }
-    if (Input.GetKeyUp(KeyCode.W))
+    else
     {
       anim.SetBool("isWalkingForward", false);
     }
 
-    /* Walk Back */ 
-    if (Input.GetKeyDown(KeyCode.S))
+    if (hitBehavior.isHit && true) // REPLACE TRUE WITH PLAYER IS ATTACKING
     {
-      anim.SetBool("isWalkingBack", true);
-    }
-    if (Input.GetKeyUp(KeyCode.S))
-    {
-      anim.SetBool("isWalkingBack", false);
-    }
-
-    /* Strafe Right (default strafe direction) */ 
-    if (Input.GetKeyDown(KeyCode.A))
-    {
-      anim.SetBool("isStrafingRight", true);
-    }
-    if (Input.GetKeyUp(KeyCode.A))
-    {
-      anim.SetBool("isStrafingRight", false);
-    }
-
-    /* Strafe Right (alternate strafe direction) */ 
-    if (Input.GetKeyDown(KeyCode.D))
-    {
-      anim.SetBool("isStrafingLeft", true);
-    }
-    if (Input.GetKeyUp(KeyCode.D))
-    {
-      anim.SetBool("isStrafingLeft", false);
-    }
-
-    /* Die */ 
-    if (Input.GetKeyDown(KeyCode.U))
-    {
-      anim.SetBool("isDead", true);
-    }
-    if (Input.GetKeyUp(KeyCode.U))
-    {
-      anim.SetBool("isDead", false);
+      hitBehavior.isHit = false;
+      anim.SetTrigger("Hurt");
+      health -= playerHitDamage;
+      if (health < 0)
+      {
+        anim.SetBool("isDead", true);
+        isDead = true;
+      }
     }
   }
 }
